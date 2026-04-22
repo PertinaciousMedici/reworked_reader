@@ -41,17 +41,17 @@ namespace dist {
 
         const int distance = static_cast<int>(
             EARTH_RADIUS * std::acos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0
-            );
+        );
         return static_cast<double>(distance);
     }
 }
 
-Instance parseTSP(const std::string& filepath) {
+Instance parseTSP(const std::string &filepath) {
     Instance instance;
 
     instance.name = std::filesystem::path(filepath)
-        .stem()
-        .string();
+            .stem()
+            .string();
 
     // ReSharper disable once CppTooWideScopeInitStatement
     std::ifstream file(filepath);
@@ -70,8 +70,7 @@ Instance parseTSP(const std::string& filepath) {
 
         if (value == ":") {
             file >> value;
-        }
-        else if (!value.empty() && value.front() == ':') {
+        } else if (!value.empty() && value.front() == ':') {
             value = value.substr(1);
         }
 
@@ -83,22 +82,17 @@ Instance parseTSP(const std::string& filepath) {
     while (file >> token) {
         if (token == "DIMENSION" || token == "DIMENSION:") {
             instance.dimension = std::stoi(readValue());
-        }
-        else if (token == "EDGE_WEIGHT_TYPE" || token == "EDGE_WEIGHT_TYPE:") {
+        } else if (token == "EDGE_WEIGHT_TYPE" || token == "EDGE_WEIGHT_TYPE:") {
             ewType = readValue();
-        }
-        else if (token == "EDGE_WEIGHT_FORMAT" || token == "EDGE_WEIGHT_FORMAT:") {
+        } else if (token == "EDGE_WEIGHT_FORMAT" || token == "EDGE_WEIGHT_FORMAT:") {
             ewFormat = readValue();
-        }
-        else if (token == "EDGE_WEIGHT_SECTION") {
+        } else if (token == "EDGE_WEIGHT_SECTION") {
             isExplicit = true;
             break;
-        }
-        else if (token == "NODE_COORD_SECTION") {
+        } else if (token == "NODE_COORD_SECTION") {
             isExplicit = false;
             break;
-        }
-        else if (token == "EOF") {
+        } else if (token == "EOF") {
             break;
         }
     }
@@ -121,8 +115,7 @@ Instance parseTSP(const std::string& filepath) {
                     if (i != j) instance.distMatrix[i * dim + j] = value;
                 }
             }
-        }
-        else if (ewFormat == "UPPER_ROW") {
+        } else if (ewFormat == "UPPER_ROW") {
             for (int i = 0; i < dim; i++) {
                 for (int j = i + 1; j < dim; j++) {
                     double value;
@@ -131,8 +124,7 @@ Instance parseTSP(const std::string& filepath) {
                     instance.distMatrix[j * dim + i] = value; // Propriedade simetrica
                 }
             }
-        }
-        else if (ewFormat == "LOWER_ROW") {
+        } else if (ewFormat == "LOWER_ROW") {
             for (int i = 1; i < dim; i++) {
                 for (int j = 0; j < i; j++) {
                     double value;
@@ -141,8 +133,7 @@ Instance parseTSP(const std::string& filepath) {
                     instance.distMatrix[j * dim + i] = value;
                 }
             }
-        }
-        else if (ewFormat == "UPPER_DIAG_ROW") {
+        } else if (ewFormat == "UPPER_DIAG_ROW") {
             for (int i = 0; i < dim; i++) {
                 for (int j = i; j < dim; j++) {
                     double value;
@@ -153,8 +144,7 @@ Instance parseTSP(const std::string& filepath) {
                     }
                 }
             }
-        }
-        else if (ewFormat == "LOWER_DIAG_ROW") {
+        } else if (ewFormat == "LOWER_DIAG_ROW") {
             for (int i = 0; i < dim; i++) {
                 for (int j = 0; j <= i; j++) {
                     double value;
@@ -165,8 +155,7 @@ Instance parseTSP(const std::string& filepath) {
                     }
                 }
             }
-        }
-        else if (ewFormat == "UPPER_COL") {
+        } else if (ewFormat == "UPPER_COL") {
             for (int j = 1; j < dim; j++) {
                 for (int i = 0; i < j; i++) {
                     double value;
@@ -175,8 +164,7 @@ Instance parseTSP(const std::string& filepath) {
                     instance.distMatrix[j * dim + i] = value;
                 }
             }
-        }
-        else if (ewFormat == "LOWER_COL") {
+        } else if (ewFormat == "LOWER_COL") {
             for (int j = 0; j < dim; j++) {
                 for (int i = j + 1; i < dim; i++) {
                     double value;
@@ -185,8 +173,7 @@ Instance parseTSP(const std::string& filepath) {
                     instance.distMatrix[j * dim + i] = value;
                 }
             }
-        }
-        else if (ewFormat == "LOWER_DIAG_COL") {
+        } else if (ewFormat == "LOWER_DIAG_COL") {
             for (int j = 0; j < dim; j++) {
                 for (int i = j; i < dim; i++) {
                     double value;
@@ -197,70 +184,66 @@ Instance parseTSP(const std::string& filepath) {
                     }
                 }
             }
-        }
-        else {
+        } else {
             throw std::runtime_error("Tipo de edge weight format nao suportado: " + ewFormat);
         }
-    }
-    else {
-    instance.explicitCoord = true;
-    instance.xCoord.resize(dim);
-    instance.yCoord.resize(dim);
-
-    for (int i = 0; i < dim; i++) {
-        int id;
-        file >> id >> instance.xCoord[i] >> instance.yCoord[i];
-    }
-
-    if (ewType == "GEO") {
-        std::vector<double> lats(dim), lons(dim);
+    } else {
+        instance.explicitCoord = true;
+        instance.xCoord.resize(dim);
+        instance.yCoord.resize(dim);
 
         for (int i = 0; i < dim; i++) {
-            lats[i] = dist::toRadians(instance.xCoord[i]);
-            lons[i] = dist::toRadians(instance.yCoord[i]);
+            int id;
+            file >> id >> instance.xCoord[i] >> instance.yCoord[i];
         }
 
-        for (int i = 0; i < dim; i++) {
-            for (int j = i + 1; j < dim; j++) {
-                double d = dist::geo(lats[i], lons[i], lats[j], lons[j]);
-                instance.distMatrix[i * dim + j] = d;
-                instance.distMatrix[j * dim + i] = d;
+        if (ewType == "GEO") {
+            std::vector<double> lats(dim), lons(dim);
+
+            for (int i = 0; i < dim; i++) {
+                lats[i] = dist::toRadians(instance.xCoord[i]);
+                lons[i] = dist::toRadians(instance.yCoord[i]);
+            }
+
+            for (int i = 0; i < dim; i++) {
+                for (int j = i + 1; j < dim; j++) {
+                    double d = dist::geo(lats[i], lons[i], lats[j], lons[j]);
+                    instance.distMatrix[i * dim + j] = d;
+                    instance.distMatrix[j * dim + i] = d;
+                }
+            }
+        } else {
+            for (int i = 0; i < dim; i++) {
+                for (int j = i + 1; j < dim; j++) {
+                    double d = 0.0;
+                    if (ewType == "EUC_2D") {
+                        d = std::floor(
+                            dist::euc(instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j])
+                            + 0.5
+                        );
+                    } else if (ewType == "CEIL_2D") {
+                        d = std::ceil(
+                            dist::euc(instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j])
+                        );
+                    } else if (ewType == "ATT") {
+                        d = dist::pseudoEuc(
+                            instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j]
+                        );
+                    } else {
+                        throw std::runtime_error("erro ao processar o edge type, nao suportado: " + ewType);
+                    }
+
+                    instance.distMatrix[i * dim + j] = d;
+                    instance.distMatrix[j * dim + i] = d;
+                }
             }
         }
     }
-    else {
-        for (int i = 0; i < dim; i++) {
-            for (int j = i + 1; j < dim; j++) {
-                double d = 0.0;
-                if (ewType == "EUC_2D") {
-                    d = std::floor(
-                        dist::euc(instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j])
-                        + 0.5
-                        );
-                }
-                else if (ewType == "CEIL_2D") {
-                    d = std::ceil(
-                        dist::euc(instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j])
-                        );
-                }
-                else if (ewType == "ATT") {
-                    d = dist::pseudoEuc(
-                        instance.xCoord[i], instance.yCoord[i], instance.xCoord[j], instance.yCoord[j]
-                        );
-                } else {
-                    throw std::runtime_error("erro ao processar o edge type, nao suportado: " + ewType);
-                }
 
-                instance.distMatrix[i * dim + j] = d;
-                instance.distMatrix[j * dim + i] = d;
-            }
-        }
-    }
-}
     return instance;
 }
 
-void printMatrix(const Instance& instance) {
+void printMatrix(const Instance &instance) {
     const int dim = instance.dimension;
 
     for (int i = 0; i < dim; i++) {
@@ -269,8 +252,7 @@ void printMatrix(const Instance& instance) {
 
             if (dist == Instance::INF) {
                 std::cout << std::setw(8) << "INF";
-            }
-            else {
+            } else {
                 std::cout << std::setw(8) << dist;
             }
         }
