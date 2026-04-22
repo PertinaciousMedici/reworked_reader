@@ -3,7 +3,7 @@
 
 #include "instance.h"
 
-Instance parseTSP(const std::string& filepath);
-void printMatrix(const Instance& instance);
+Instance parseTSP(const std::string &filepath);
+void printMatrix(const Instance &instance);
 
 #endif
