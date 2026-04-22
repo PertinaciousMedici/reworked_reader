@@ -4,7 +4,6 @@
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
-
 #include "instance.h"
 #include "parser.h"
 
@@ -203,7 +202,7 @@ Instance parseTSP(const std::string& filepath) {
             throw std::runtime_error("Tipo de edge weight format nao suportado: " + ewFormat);
         }
     }
-else {
+    else {
     instance.explicitCoord = true;
     instance.xCoord.resize(dim);
     instance.yCoord.resize(dim);
@@ -228,7 +227,8 @@ else {
                 instance.distMatrix[j * dim + i] = d;
             }
         }
-    } else {
+    }
+    else {
         for (int i = 0; i < dim; i++) {
             for (int j = i + 1; j < dim; j++) {
                 double d = 0.0;
