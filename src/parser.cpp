@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <stdexcept>
 
 #include "instance.h"
@@ -272,8 +273,8 @@ void printMatrix(const Instance& instance) {
             else {
                 std::cout << std::setw(8) << dist;
             }
-            std::cout << "\n";
         }
-        std::cout << std::endl;
+        std::cout << '\n';
     }
+    std::cout << std::endl;
 }
